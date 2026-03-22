@@ -1,4 +1,4 @@
-  {
+{
     "sample_rate":  22050,
     "n_fft": 1024,
     "hop_length": 256,
@@ -8,5 +8,7 @@
     "hidden_size": 256,
     "batch_size": 16,
     "epochs": 100,
-    "lr": 0.0002
-  }
+    "lr": 0.0002,
+    "target_path": "jinx",
+    "source_path": "myVoice"
+}
