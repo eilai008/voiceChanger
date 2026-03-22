@@ -14,5 +14,6 @@
     "target_path": "jinx",
     "source_path": "myVoice",
     "lambda_cycle": 10,
-    "lambda_identity": 5
+    "lambda_identity": 5,
+    "model_name": "model1"
 }
