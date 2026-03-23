@@ -18,10 +18,10 @@ class VoiceDataset(Dataset):
     def __len__(self):
         return self.len
     def __getitem__(self, idx):
-        return torch.load(self.data[idx])
+        return torch.load(self.data[idx],weights_only=True)
 
 
-def get_dataloader(dataset, config):
-    return torch.utils.data.DataLoader(dataset, batch_size=config["batch_size"], shuffle =True)
+def get_dataloader(dataset, config,shuffle):
+    return torch.utils.data.DataLoader(dataset, batch_size=config["batch_size"], shuffle =shuffle)
 
 

@@ -6,6 +6,7 @@ import feeder
 import preprocessing
 import json
 import os
+import evaluate
 
 def setup(config):
     G_AtoB = architecture.Generator(config)
@@ -15,10 +16,16 @@ def setup(config):
     optimizer = optim.Adam(list(G_AtoB.parameters()) + list(G_BtoA.parameters()), lr=config['lr'],betas=(config['beta1'], config['beta2']))
     optimizer2 = optim.Adam(list(D_A.parameters()) + list(D_B.parameters()), lr=config['lr'],betas=(config['beta1'], config['beta2']))
     dataset_a = feeder.VoiceDataset(os.path.join(os.path.dirname(__file__), "data/processed", config['source_path']))
-    loader_a = feeder.get_dataloader(dataset_a, config)
+    train_a, val_a = torch.utils.data.random_split(dataset_a, [0.8, 0.2])
+    loader_a = feeder.get_dataloader(train_a, config,True)
+    val_loader_a = feeder.get_dataloader(val_a, config,False)
+
     dataset_b = feeder.VoiceDataset(os.path.join(os.path.dirname(__file__), "data/processed", config['target_path']))
-    loader_b = feeder.get_dataloader(dataset_b, config)
-    return G_AtoB, G_BtoA, D_A, D_B, optimizer, optimizer2, loader_a, loader_b
+    train_b, val_b = torch.utils.data.random_split(dataset_b, [0.8, 0.2])
+    loader_b = feeder.get_dataloader(train_b, config,True)
+    val_loader_b = feeder.get_dataloader(val_b, config,False)
+
+    return G_AtoB, G_BtoA, D_A, D_B, optimizer, optimizer2, loader_a, loader_b, val_loader_a, val_loader_b
 
 def train_epoch(G_AtoB, G_BtoA, D_A, D_B, opt_G, opt_D, loader_a, loader_b, config):
     criterion = nn.MSELoss()
@@ -69,10 +76,14 @@ def train_epoch(G_AtoB, G_BtoA, D_A, D_B, opt_G, opt_D, loader_a, loader_b, conf
 
 def train():
     config = preprocessing.load_config()
-    G_AtoB, G_BtoA, D_A, D_B, opt_G, opt_D, loader_a, loader_b = setup(config)
-
+    G_AtoB, G_BtoA, D_A, D_B, opt_G, opt_D, loader_a, loader_b, val_load_a, val_load_b = setup(config)
+    g_losses = []
+    d_losses = []
+    val_losses = []
     for epoch in range(config['epochs']):
         loses =train_epoch(G_AtoB, G_BtoA, D_A, D_B, opt_G, opt_D, loader_a, loader_b, config)
+        d_losses.append(loses[1])
+        g_losses.append(loses[0])
         print(f"Epoch {epoch + 1}/{config['epochs']} complete")
         print(f"lose_g = {loses[0]} | lose_d = {loses[1]}")
         if (epoch+1)%10==0:
@@ -82,6 +93,10 @@ def train():
             torch.save(G_BtoA.state_dict(),os.path.join(save_dir,f'G_BtoA_{epoch+1}.pth'))
             torch.save(D_A.state_dict(),os.path.join(save_dir,f'D_A_{epoch+1}.pth'))
             torch.save(D_B.state_dict(),os.path.join(save_dir,f'D_B_{epoch+1}.pth'))
+
+            #evaluate
+            val_losses.append(evaluate.evaluate(val_load_a,val_load_b,config,config['model_name'],epoch+1))
+    evaluate.plot_losses(g_losses, d_losses, val_losses,config['model_name'])
 
 
 
