@@ -76,10 +76,12 @@ def train():
         print(f"Epoch {epoch + 1}/{config['epochs']} complete")
         print(f"lose_g = {loses[0]} | lose_d = {loses[1]}")
         if (epoch+1)%10==0:
-            torch.save(G_AtoB.state_dict(), os.path.join(os.path.dirname(__file__), 'models/saved_models',config['model_name'],f'G_AtoB({epoch+1}).pth'))
-            torch.save(G_BtoA.state_dict(),os.path.join(os.path.dirname(__file__), 'models/saved_models', config['model_name'],f'G_BtoA({epoch+1}).pth'))
-            torch.save(D_A.state_dict(),os.path.join(os.path.dirname(__file__), 'models/saved_models', config['model_name'],f'D_A({epoch+1}).pth'))
-            torch.save(D_B.state_dict(),os.path.join(os.path.dirname(__file__), 'models/saved_models', config['model_name'],f'D_B({epoch+1}).pth'))
+            save_dir = os.path.join(os.path.dirname(__file__), 'models/saved_models', config['model_name'])
+            os.makedirs(save_dir, exist_ok=True)
+            torch.save(G_AtoB.state_dict(), os.path.join(save_dir,f'G_AtoB_{epoch+1}.pth'))
+            torch.save(G_BtoA.state_dict(),os.path.join(save_dir,f'G_BtoA_{epoch+1}.pth'))
+            torch.save(D_A.state_dict(),os.path.join(save_dir,f'D_A_{epoch+1}.pth'))
+            torch.save(D_B.state_dict(),os.path.join(save_dir,f'D_B_{epoch+1}.pth'))
 
 
 
