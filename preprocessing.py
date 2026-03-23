@@ -36,7 +36,7 @@ def read_data(input_path, output_path,config):
     c = 0
     for x in fi:
         for filename in x[2]:
-            if not filename.endswith((".wav", ".mp3")):
+            if not filename.endswith((".wav", ".mp3",".ogg")):
                 continue
             voice = load_audio(os.path.join(x[0], filename), config)
             mel_spectrogram = to_mel_spectrogram(voice, config)
